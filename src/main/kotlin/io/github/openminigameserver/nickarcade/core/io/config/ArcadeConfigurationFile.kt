@@ -1,6 +1,6 @@
 package io.github.openminigameserver.nickarcade.core.io.config
 
-import io.github.openminigameserver.nickarcade.core.pluginInstance
+import io.github.openminigameserver.nickarcade.plugin.pluginInstance
 import org.spongepowered.configurate.CommentedConfigurationNode
 import org.spongepowered.configurate.ConfigurationOptions
 import org.spongepowered.configurate.kotlin.objectMapper

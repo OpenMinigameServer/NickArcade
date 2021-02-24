@@ -1,13 +1,13 @@
 package io.github.openminigameserver.nickarcade.plugin
 
+import io.github.openminigameserver.hypixelapi.HypixelApi
+import io.github.openminigameserver.hypixelapi.utis.HypixelPlayerInfoHelper
 import io.github.openminigameserver.nickarcade.core.IoC
 import io.github.openminigameserver.nickarcade.core.io.config.ArcadeConfigurationFile
 import io.github.openminigameserver.nickarcade.core.io.config.impl.MainConfigurationFile
 import io.github.openminigameserver.nickarcade.core.io.database.DatabaseService
-import io.github.openminigameserver.nickarcade.core.io.database.helpers.MongoDbConnectionHelper
 import org.bukkit.plugin.java.JavaPlugin
-import org.litote.kmongo.coroutine.CoroutineClient
-import org.litote.kmongo.coroutine.CoroutineDatabase
+import java.util.*
 
 class NickArcadePlugin : JavaPlugin() {
     companion object {
@@ -19,10 +19,27 @@ class NickArcadePlugin : JavaPlugin() {
 
     override fun onEnable() {
         INSTANCE = this
-        IoC += this
 
+        prepareIoCValues()
         initMainConfig()
         connectToDatabase()
+        initHypixelServices()
+    }
+
+    private fun prepareIoCValues() {
+        IoC += this
+        IoC += this.logger
+    }
+
+
+    private fun initHypixelServices() {
+        if (mainConfiguration.hypixelKey != UUID(0, 0)) {
+            val service = HypixelApi.getService(mainConfiguration.hypixelKey)
+            IoC += service
+            IoC += HypixelPlayerInfoHelper(service)
+            return
+        }
+        throw Exception("Unable to initialize plugin! Reason: Unable to initialize Hypixel services")
     }
 
     private fun connectToDatabase() {

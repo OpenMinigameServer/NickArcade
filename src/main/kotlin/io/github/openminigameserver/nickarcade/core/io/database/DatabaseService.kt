@@ -5,10 +5,10 @@ import io.github.openminigameserver.nickarcade.core.io.config.impl.MongoDbConfig
 import io.github.openminigameserver.nickarcade.core.io.database.helpers.MongoDbConnectionHelper
 
 class DatabaseService(config: MongoDbConfiguration) {
-    private val databaseClient = config.run {
+    val databaseClient = config.run {
         MongoDbConnectionHelper.buildClient(host, port, username, database, password)
     }
-    private val database = databaseClient.getDatabase(config.database)
+    val database = databaseClient.getDatabase(config.database)
 
     init {
         IoC += database

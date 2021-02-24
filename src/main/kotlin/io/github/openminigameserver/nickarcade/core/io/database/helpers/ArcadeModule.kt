@@ -7,7 +7,7 @@ import kotlinx.datetime.Instant
 
 object ArcadeModule : SimpleModule("NickArcade") {
     init {
-        addSerializer(Instant::class, InstantSerializer)
-        addDeserializer(Instant::class, InstantDeserializer)
+        addSerializer(Instant::class.java, InstantSerializer)
+        addDeserializer(Instant::class.java, InstantDeserializer)
     }
 }
