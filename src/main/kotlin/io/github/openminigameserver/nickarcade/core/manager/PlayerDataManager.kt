@@ -96,9 +96,8 @@ object PlayerDataManager {
     }
 
     suspend fun savePlayerData(it: ArcadeSender) {
-        //Don't save Console Player Data
+        //Don't save Console Data
         if (it == consoleData || it !is ArcadePlayer) return
-
 
         logger.info("Saving player data for ${it.displayName} [${it.uuid}]")
         savePlayerData(it.data)

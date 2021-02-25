@@ -1,9 +1,9 @@
 package io.github.openminigameserver.nickarcade.plugin.events
 
-import io.github.openminigameserver.nickarcade.core.manager.PlayerDataManager
-import io.github.openminigameserver.nickarcade.core.manager.getArcadeSender
 import io.github.openminigameserver.nickarcade.core.events.data.PlayerDataJoinEvent
 import io.github.openminigameserver.nickarcade.core.events.data.PlayerDataLeaveEvent
+import io.github.openminigameserver.nickarcade.core.manager.PlayerDataManager
+import io.github.openminigameserver.nickarcade.core.manager.getArcadeSender
 import io.github.openminigameserver.nickarcade.core.ticks
 import io.github.openminigameserver.nickarcade.plugin.extensions.async
 import io.github.openminigameserver.nickarcade.plugin.extensions.event
@@ -13,6 +13,7 @@ import net.kyori.adventure.text.Component.text
 import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.TextDecoration
 import org.bukkit.event.player.AsyncPlayerPreLoginEvent
+import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.event.player.PlayerLoginEvent
 import org.bukkit.event.player.PlayerQuitEvent
 
@@ -42,9 +43,16 @@ object PlayerEvents {
 
     private val validNamePattern = Regex("^[a-zA-Z0-9_]{3,16}\$")
     fun registerHandlers() {
+        registerJoinEvent()
         registerPreLoginEvent()
         registerLoginEvent()
         registerQuitEvent()
+    }
+
+    private fun registerJoinEvent() {
+        event<PlayerJoinEvent>(forceBlocking = true) {
+            joinMessage(null)
+        }
     }
 
     private fun registerLoginEvent() {

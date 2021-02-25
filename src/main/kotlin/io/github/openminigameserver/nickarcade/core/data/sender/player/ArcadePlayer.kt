@@ -139,7 +139,7 @@ class ArcadePlayer(val data: ArcadePlayerData) : ArcadeSender(data.uuid) {
         return effectiveRank.ordinal >= rank.ordinal
     }
 
-    private fun hasAtLeastDisplayRank(rank: HypixelPackageRank): Boolean {
+    fun hasAtLeastDisplayRank(rank: HypixelPackageRank): Boolean {
         return effectiveDisplayRank.ordinal >= rank.ordinal
     }
 
