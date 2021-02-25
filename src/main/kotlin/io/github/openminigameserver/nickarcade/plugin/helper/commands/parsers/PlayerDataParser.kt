@@ -3,14 +3,13 @@ package io.github.openminigameserver.nickarcade.plugin.helper.commands.parsers
 import cloud.commandframework.arguments.parser.ArgumentParseResult
 import cloud.commandframework.arguments.parser.ArgumentParser
 import cloud.commandframework.context.CommandContext
-import io.github.openminigameserver.nickarcade.core.manager.PlayerDataManager
-import io.github.openminigameserver.nickarcade.core.manager.getArcadeSender
 import io.github.openminigameserver.hypixelapi.models.HypixelPlayer
 import io.github.openminigameserver.nickarcade.core.data.sender.player.ArcadePlayer
 import io.github.openminigameserver.nickarcade.core.data.sender.player.ArcadePlayerData
 import io.github.openminigameserver.nickarcade.core.data.sender.player.extra.PlayerOverrides
 import io.github.openminigameserver.nickarcade.core.div
-import io.github.openminigameserver.nickarcade.plugin.extensions.sync
+import io.github.openminigameserver.nickarcade.core.manager.PlayerDataManager
+import io.github.openminigameserver.nickarcade.core.manager.getArcadeSender
 import kotlinx.coroutines.runBlocking
 import org.bukkit.Bukkit.getOnlinePlayers
 import org.bukkit.Bukkit.getPlayer
@@ -93,7 +92,7 @@ class PlayerDataParser<C> : ArgumentParser<C, ArcadePlayer> {
 
             return@runBlocking (allElements.mapNotNull {
                 it.hypixelData?.displayName
-            } + sync { getOnlinePlayers().map { it.getArcadeSender() } }.map { it.actualDisplayName }).distinct()
+            } + getOnlinePlayers().map { it.getArcadeSender() }.map { it.actualDisplayName }).distinct()
                 .toMutableList()
         }
     }
