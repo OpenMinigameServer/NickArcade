@@ -2,11 +2,14 @@ package io.github.openminigameserver.nickarcade.core.data.sender.misc
 
 import io.github.openminigameserver.hypixelapi.models.HypixelPackageRank
 import io.github.openminigameserver.nickarcade.core.data.sender.ArcadeSender
+import io.github.openminigameserver.nickarcade.core.data.sender.player.extra.ExtraDataValue
 import org.bukkit.Bukkit
 import org.bukkit.command.CommandSender
 import java.util.*
 
 object ArcadeConsole : ArcadeSender(UUID(0, 0)) {
+    override val extraData: MutableMap<String, ExtraDataValue> = mutableMapOf()
+
     override val displayName: String
         get() = "Server Console"
 

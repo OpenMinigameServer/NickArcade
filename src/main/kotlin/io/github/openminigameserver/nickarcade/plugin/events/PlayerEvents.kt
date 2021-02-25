@@ -2,6 +2,7 @@ package io.github.openminigameserver.nickarcade.plugin.events
 
 import io.github.openminigameserver.nickarcade.core.events.data.PlayerDataJoinEvent
 import io.github.openminigameserver.nickarcade.core.events.data.PlayerDataLeaveEvent
+import io.github.openminigameserver.nickarcade.core.events.data.PlayerDataReloadEvent
 import io.github.openminigameserver.nickarcade.core.manager.PlayerDataManager
 import io.github.openminigameserver.nickarcade.core.manager.getArcadeSender
 import io.github.openminigameserver.nickarcade.core.ticks
@@ -64,6 +65,7 @@ object PlayerEvents {
             }
 
             PlayerDataJoinEvent(playerData).callEvent()
+            PlayerDataReloadEvent(playerData).callEvent()
         }
     }
 

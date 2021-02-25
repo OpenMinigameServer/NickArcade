@@ -4,7 +4,8 @@ import io.github.openminigameserver.hypixelapi.models.HypixelPackageRank
 import io.github.openminigameserver.hypixelapi.models.HypixelPlayer
 import io.github.openminigameserver.hypixelapi.utis.MinecraftChatColor
 import io.github.openminigameserver.nickarcade.core.data.sender.ArcadeSender
-import io.github.openminigameserver.nickarcade.core.data.sender.player.extra.ExtraDataTag
+import io.github.openminigameserver.nickarcade.core.data.sender.player.extra.ExtraDataValue
+import io.github.openminigameserver.nickarcade.core.data.sender.player.extra.RuntimeExtraDataTag
 import net.kyori.adventure.audience.Audience
 import net.kyori.adventure.text.Component.newline
 import net.kyori.adventure.text.Component.text
@@ -31,29 +32,32 @@ class ArcadePlayer(val data: ArcadePlayerData) : ArcadeSender(data.uuid) {
     override val audience: Audience
         get() = commandSender
 
-    
+
     val player: Player?
         get() = Bukkit.getPlayer(uuid)
 
     //region Extra data
 
-    private val extraData = mutableMapOf<String, Any?>()
-    operator fun <T> contains(dataTag: ExtraDataTag<T>): Boolean {
+    override val extraData: MutableMap<String, ExtraDataValue>
+        get() = data.extraData
+
+    private val runtimeExtraData = mutableMapOf<String, Any?>()
+    operator fun <T> contains(dataTag: RuntimeExtraDataTag<T>): Boolean {
         return get(dataTag) != null
     }
 
     @Suppress("UNCHECKED_CAST")
-    operator fun <T> get(dataTag: ExtraDataTag<T>): T? {
-        return extraData[dataTag.tagName] as? T?
+    operator fun <T> get(dataTag: RuntimeExtraDataTag<T>): T? {
+        return runtimeExtraData[dataTag.tagName] as? T?
     }
 
     
-    operator fun <T> set(dataTag: ExtraDataTag<T>, value: T) {
+    operator fun <T> set(dataTag: RuntimeExtraDataTag<T>, value: T) {
         if (value == null) {
-            extraData.remove(dataTag.tagName)
+            runtimeExtraData.remove(dataTag.tagName)
             return
         }
-        extraData[dataTag.tagName] = value
+        runtimeExtraData[dataTag.tagName] = value
     }
     //endregion
 

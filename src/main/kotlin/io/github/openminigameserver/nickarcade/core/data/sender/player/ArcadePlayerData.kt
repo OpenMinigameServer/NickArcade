@@ -1,9 +1,13 @@
 package io.github.openminigameserver.nickarcade.core.data.sender.player
 
-import com.fasterxml.jackson.annotation.*
+import com.fasterxml.jackson.annotation.JsonIdentityInfo
+import com.fasterxml.jackson.annotation.JsonIgnore
+import com.fasterxml.jackson.annotation.JsonProperty
+import com.fasterxml.jackson.annotation.ObjectIdGenerators
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.treeToValue
 import io.github.openminigameserver.hypixelapi.models.HypixelPlayer
+import io.github.openminigameserver.nickarcade.core.data.sender.player.extra.ExtraDataValue
 import io.github.openminigameserver.nickarcade.core.data.sender.player.extra.PlayerOverrides
 import kotlinx.datetime.Instant
 import java.util.*
@@ -19,8 +23,8 @@ data class ArcadePlayerData(
     var lastProfileUpdate: Instant = Instant.DISTANT_PAST
 ) {
 
-    @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS)
-    val extraData: MutableMap<String, Any> = mutableMapOf()
+    @PublishedApi
+    internal val extraData: MutableMap<String, ExtraDataValue> = mutableMapOf()
 
     init {
         updateHypixelData()

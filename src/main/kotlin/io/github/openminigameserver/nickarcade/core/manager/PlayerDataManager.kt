@@ -8,6 +8,7 @@ import io.github.openminigameserver.nickarcade.core.data.sender.misc.ArcadeConso
 import io.github.openminigameserver.nickarcade.core.data.sender.player.ArcadePlayer
 import io.github.openminigameserver.nickarcade.core.data.sender.player.ArcadePlayerData
 import io.github.openminigameserver.nickarcade.core.database
+import io.github.openminigameserver.nickarcade.core.events.data.PlayerDataReloadEvent
 import io.github.openminigameserver.nickarcade.core.hypixelPlayerInfoHelper
 import io.github.openminigameserver.nickarcade.core.logger
 import kotlinx.datetime.Clock
@@ -109,6 +110,10 @@ object PlayerDataManager {
 
     fun storeInMemory(data: ArcadePlayer) {
         loadedPlayerMap[data.uuid] = data
+    }
+
+    fun reloadProfile(player: ArcadePlayer) {
+        PlayerDataReloadEvent(player).callEvent()
     }
 }
 
