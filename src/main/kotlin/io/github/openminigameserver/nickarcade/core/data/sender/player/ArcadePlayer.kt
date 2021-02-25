@@ -6,6 +6,7 @@ import io.github.openminigameserver.hypixelapi.utis.MinecraftChatColor
 import io.github.openminigameserver.nickarcade.core.data.sender.ArcadeSender
 import io.github.openminigameserver.nickarcade.core.data.sender.player.extra.ExtraDataValue
 import io.github.openminigameserver.nickarcade.core.data.sender.player.extra.RuntimeExtraDataTag
+import io.github.openminigameserver.nickarcade.core.manager.PlayerDataProviderManager
 import net.kyori.adventure.audience.Audience
 import net.kyori.adventure.text.Component.newline
 import net.kyori.adventure.text.Component.text
@@ -51,7 +52,7 @@ class ArcadePlayer(val data: ArcadePlayerData) : ArcadeSender(data.uuid) {
         return runtimeExtraData[dataTag.tagName] as? T?
     }
 
-    
+
     operator fun <T> set(dataTag: RuntimeExtraDataTag<T>, value: T) {
         if (value == null) {
             runtimeExtraData.remove(dataTag.tagName)
@@ -61,11 +62,11 @@ class ArcadePlayer(val data: ArcadePlayerData) : ArcadeSender(data.uuid) {
     }
     //endregion
 
-    
+
     val isOnline: Boolean
         get() = player != null
 
-    
+
     val effectivePrefix: String
         get() = computeEffectivePrefix() ?: ""
 
@@ -87,38 +88,41 @@ class ArcadePlayer(val data: ArcadePlayerData) : ArcadeSender(data.uuid) {
                 } else null
     }
 
-    private fun effectivePlayerOverrides() = with(data) { /*displayOverrides.overrides ?:*/ overrides }
+    private val playerDataProvider get() = PlayerDataProviderManager.getPlayerDataProvider()
 
-    
+    private fun effectivePlayerOverrides() = playerDataProvider?.provideOverrides(this) ?: data.overrides
+
     override val displayName: String
-        get() = with(data) { /*displayOverrides.displayProfile?.name ?:*/ actualDisplayName }
+        get() {
+            return playerDataProvider?.provideDisplayName(this) ?: actualDisplayName
+        }
 
     override val commandSender: CommandSender
         get() = player!!
 
-    
+
     val actualDisplayName: String
         get() = with(data) { overrides.nameOverride ?: hypixelData?.displayName ?: "" }
 
-    
+
     val effectiveRank: HypixelPackageRank
         get() = data.overrides.rankOverride ?: data.hypixelData?.effectiveRank ?: HypixelPackageRank.NONE
 
-    
+
     val effectiveDisplayRank: HypixelPackageRank
         get() = effectivePlayerOverrides().rankOverride ?: effectiveRank
 
-    
+
     val networkLevel: Long
         get() = effectivePlayerOverrides().networkLevel ?: data.hypixelData?.networkLevel ?: 1
 
-    
+
     fun getChatName(): String = getChatName(false)
 
-    
+
     fun getChatName(actualData: Boolean): String = getChatName(actualData, false)
 
-    
+
     override fun getChatName(actualData: Boolean, colourPrefixOnly: Boolean): String {
         var name = displayName
         var prefix = effectivePrefix
@@ -133,7 +137,7 @@ class ArcadePlayer(val data: ArcadePlayerData) : ArcadeSender(data.uuid) {
 
         return "$prefix$name"
     }
-    
+
     //region Rank
     override fun hasAtLeastRank(rank: HypixelPackageRank, actualData: Boolean): Boolean {
         return actualData && hasAtLeastRank(rank) || hasAtLeastDisplayRank(rank)
@@ -182,7 +186,7 @@ class ArcadePlayer(val data: ArcadePlayerData) : ArcadeSender(data.uuid) {
 }
 /*
     TODO: Player games / party data
-    
+
     fun getOrCreateParty(): Party {
         if (getCurrentParty() == null) {
             return PartyManager.createParty(this)
@@ -190,12 +194,12 @@ class ArcadePlayer(val data: ArcadePlayerData) : ArcadeSender(data.uuid) {
         return getCurrentParty() as Party
     }
 
-    
+
     fun getCurrentGame(): Game? {
         return MiniGameManager.getCurrentGame(this)
     }
 
-    
+
     fun getCurrentParty(showPrompt: Boolean = false): Party? {
         return PartyManager.getParty(this).also {
             if (it == null && showPrompt) {
@@ -206,7 +210,7 @@ class ArcadePlayer(val data: ArcadePlayerData) : ArcadeSender(data.uuid) {
         }
     }
 
-    
+
     fun setCurrentParty(party: Party?) {
         return PartyManager.setPlayerParty(this, party)
     }
