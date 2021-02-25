@@ -1,9 +1,11 @@
-package io.github.openminigameserver.nickarcade.plugin
+package io.github.openminigameserver.nickarcade.plugin.extensions
 
+import io.github.openminigameserver.nickarcade.plugin.NickArcadePlugin
 import io.github.openminigameserver.nickarcade.plugin.helper.coroutines.AsyncCoroutineDispatcher
 import io.github.openminigameserver.nickarcade.plugin.helper.coroutines.BukkitCoroutineDispatcher
 import io.github.openminigameserver.nickarcade.plugin.helper.coroutines.CoroutineSession
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import org.bukkit.event.Event
 import org.bukkit.event.EventException
@@ -31,7 +33,7 @@ suspend inline fun <T> sync(noinline block: suspend CoroutineScope.() -> T): T =
 @Suppress("UNCHECKED_CAST")
 inline fun <reified T : Event> event(
     eventPriority: EventPriority = EventPriority.NORMAL,
-    ignoreCancelled: Boolean = false, forceAsync: Boolean = false,
+    ignoreCancelled: Boolean = false, forceAsync: Boolean = false, forceBlocking: Boolean = false,
     noinline code: suspend T.(CoroutineScope) -> Unit
 ) {
     pluginInstance.server.pluginManager.registerEvent(
@@ -40,10 +42,16 @@ inline fun <reified T : Event> event(
             if (!T::class.java.isInstance(event)) return@registerEvent
             try {
                 val isAsync = forceAsync || event.isAsynchronous
-                if (isAsync) {
-                    launchAsync { code(event as T, this) }
-                } else {
-                    launch { code(event as T, this) }
+                when {
+                    forceBlocking -> {
+                        runBlocking { code(event as T, this) }
+                    }
+                    isAsync -> {
+                        launchAsync { code(event as T, this) }
+                    }
+                    else -> {
+                        launch { code(event as T, this) }
+                    }
                 }
             } catch (var4: InvocationTargetException) {
                 throw EventException(var4.cause)
@@ -54,3 +62,4 @@ inline fun <reified T : Event> event(
         pluginInstance, ignoreCancelled
     )
 }
+

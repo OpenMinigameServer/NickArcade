@@ -1,8 +1,5 @@
 package io.github.openminigameserver.nickarcade.core.data.sender.player
 
-import com.fasterxml.jackson.annotation.JsonIgnore
-import com.fasterxml.jackson.module.kotlin.treeToValue
-import io.github.openminigameserver.hypixelapi.HypixelApi
 import io.github.openminigameserver.hypixelapi.models.HypixelPackageRank
 import io.github.openminigameserver.hypixelapi.models.HypixelPlayer
 import io.github.openminigameserver.hypixelapi.utis.MinecraftChatColor
@@ -17,13 +14,24 @@ import org.bukkit.Bukkit
 import org.bukkit.ChatColor.getLastColors
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
+import kotlin.time.Duration
 
 class ArcadePlayer(val data: ArcadePlayerData) : ArcadeSender(data.uuid) {
+
+    suspend fun coolDown(name: String, cooldownDuration: Duration, code: (suspend () -> Unit)? = null): Boolean {
+        val lastUse = data.cooldowns[name]
+        val finishTime = lastUse?.plus(cooldownDuration.inMilliseconds)
+        return if (finishTime == null || System.currentTimeMillis() > finishTime) {
+            data.cooldowns[name] = System.currentTimeMillis()
+            code?.invoke()
+            true
+        } else false
+    }
 
     override val audience: Audience
         get() = commandSender
 
-    @get:JsonIgnore
+    
     val player: Player?
         get() = Bukkit.getPlayer(uuid)
 
@@ -39,7 +47,7 @@ class ArcadePlayer(val data: ArcadePlayerData) : ArcadeSender(data.uuid) {
         return extraData[dataTag.tagName] as? T?
     }
 
-    @JsonIgnore
+    
     operator fun <T> set(dataTag: ExtraDataTag<T>, value: T) {
         if (value == null) {
             extraData.remove(dataTag.tagName)
@@ -49,11 +57,11 @@ class ArcadePlayer(val data: ArcadePlayerData) : ArcadeSender(data.uuid) {
     }
     //endregion
 
-    @get:JsonIgnore
+    
     val isOnline: Boolean
         get() = player != null
 
-    @get:JsonIgnore
+    
     val effectivePrefix: String
         get() = computeEffectivePrefix() ?: ""
 
@@ -77,36 +85,36 @@ class ArcadePlayer(val data: ArcadePlayerData) : ArcadeSender(data.uuid) {
 
     private fun effectivePlayerOverrides() = with(data) { /*displayOverrides.overrides ?:*/ overrides }
 
-    @get:JsonIgnore
+    
     override val displayName: String
         get() = with(data) { /*displayOverrides.displayProfile?.name ?:*/ actualDisplayName }
 
     override val commandSender: CommandSender
         get() = player!!
 
-    @get:JsonIgnore
+    
     val actualDisplayName: String
         get() = with(data) { overrides.nameOverride ?: hypixelData?.displayName ?: "" }
 
-    @get:JsonIgnore
+    
     val effectiveRank: HypixelPackageRank
         get() = data.overrides.rankOverride ?: data.hypixelData?.effectiveRank ?: HypixelPackageRank.NONE
 
-    @get:JsonIgnore
+    
     val effectiveDisplayRank: HypixelPackageRank
         get() = effectivePlayerOverrides().rankOverride ?: effectiveRank
 
-    @get:JsonIgnore
+    
     val networkLevel: Long
         get() = effectivePlayerOverrides().networkLevel ?: data.hypixelData?.networkLevel ?: 1
 
-    @JsonIgnore
+    
     fun getChatName(): String = getChatName(false)
 
-    @JsonIgnore
+    
     fun getChatName(actualData: Boolean): String = getChatName(actualData, false)
 
-    @JsonIgnore
+    
     override fun getChatName(actualData: Boolean, colourPrefixOnly: Boolean): String {
         var name = displayName
         var prefix = effectivePrefix
@@ -121,7 +129,8 @@ class ArcadePlayer(val data: ArcadePlayerData) : ArcadeSender(data.uuid) {
 
         return "$prefix$name"
     }
-
+    
+    //region Rank
     override fun hasAtLeastRank(rank: HypixelPackageRank, actualData: Boolean): Boolean {
         return actualData && hasAtLeastRank(rank) || hasAtLeastDisplayRank(rank)
     }
@@ -149,6 +158,7 @@ class ArcadePlayer(val data: ArcadePlayerData) : ArcadeSender(data.uuid) {
             }
         }
     }
+    //endregion
 
 
     override fun equals(other: Any?): Boolean {
@@ -168,7 +178,7 @@ class ArcadePlayer(val data: ArcadePlayerData) : ArcadeSender(data.uuid) {
 }
 /*
     TODO: Player games / party data
-    @JsonIgnore
+    
     fun getOrCreateParty(): Party {
         if (getCurrentParty() == null) {
             return PartyManager.createParty(this)
@@ -176,12 +186,12 @@ class ArcadePlayer(val data: ArcadePlayerData) : ArcadeSender(data.uuid) {
         return getCurrentParty() as Party
     }
 
-    @JsonIgnore
+    
     fun getCurrentGame(): Game? {
         return MiniGameManager.getCurrentGame(this)
     }
 
-    @JsonIgnore
+    
     fun getCurrentParty(showPrompt: Boolean = false): Party? {
         return PartyManager.getParty(this).also {
             if (it == null && showPrompt) {
@@ -192,7 +202,7 @@ class ArcadePlayer(val data: ArcadePlayerData) : ArcadeSender(data.uuid) {
         }
     }
 
-    @JsonIgnore
+    
     fun setCurrentParty(party: Party?) {
         return PartyManager.setPlayerParty(this, party)
     }

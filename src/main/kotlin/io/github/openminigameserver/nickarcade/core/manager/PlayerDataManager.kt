@@ -1,4 +1,4 @@
-package io.github.nickacpt.nickarcade.data.player
+package io.github.openminigameserver.nickarcade.core.manager
 
 import com.mongodb.client.model.UpdateOptions
 import io.github.openminigameserver.hypixelapi.models.HypixelPackageRank
