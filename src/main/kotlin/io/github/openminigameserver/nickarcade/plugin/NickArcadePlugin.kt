@@ -3,11 +3,13 @@ package io.github.openminigameserver.nickarcade.plugin
 import io.github.openminigameserver.hypixelapi.HypixelApi
 import io.github.openminigameserver.hypixelapi.utis.HypixelPlayerInfoHelper
 import io.github.openminigameserver.nickarcade.core.IoC
+import io.github.openminigameserver.nickarcade.core.commandAnnotationParser
 import io.github.openminigameserver.nickarcade.core.io.config.ArcadeConfigurationFile
 import io.github.openminigameserver.nickarcade.core.io.config.impl.MainConfigurationFile
 import io.github.openminigameserver.nickarcade.core.io.database.DatabaseService
 import io.github.openminigameserver.nickarcade.plugin.events.PlayerDataEvents
 import io.github.openminigameserver.nickarcade.plugin.events.PlayerEvents
+import io.github.openminigameserver.nickarcade.plugin.extensions.ComponentExtensions
 import io.github.openminigameserver.nickarcade.plugin.helper.commands.NickArcadeCommandHelper
 import org.bukkit.plugin.java.JavaPlugin
 import java.util.*
@@ -32,6 +34,8 @@ class NickArcadePlugin : JavaPlugin() {
         PlayerDataEvents.registerHandlers()
 
         IoC += NickArcadeCommandHelper().apply { init() }
+
+        commandAnnotationParser.parse(ComponentExtensions)
     }
 
     private fun prepareIoCValues() {
