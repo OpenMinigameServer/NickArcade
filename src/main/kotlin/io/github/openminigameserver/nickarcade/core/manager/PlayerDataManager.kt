@@ -11,13 +11,15 @@ import io.github.openminigameserver.nickarcade.core.database
 import io.github.openminigameserver.nickarcade.core.events.data.PlayerDataReloadEvent
 import io.github.openminigameserver.nickarcade.core.hypixelPlayerInfoHelper
 import io.github.openminigameserver.nickarcade.core.logger
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.datetime.Clock
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
-import kotlin.time.hours
 import kotlin.time.measureTimedValue
+import kotlin.time.minutes
 
 object PlayerDataManager {
     private val loadedPlayerMap = ConcurrentHashMap<UUID, ArcadePlayer>()
@@ -50,14 +52,20 @@ object PlayerDataManager {
         }
     }
 
+    private val userMutexMap = mutableMapOf<UUID, Mutex>()
+
+    private fun getPlayerDataMutexForUUID(uniqueId: UUID) = userMutexMap.getOrPut(uniqueId) { Mutex(false) }
+
     suspend fun getPlayerData(uniqueId: UUID, name: String): ArcadePlayer {
         return if (loadedPlayerMap[uniqueId] != null) {
             loadedPlayerMap[uniqueId]!!
         } else {
-            logger.info("Unable to find cached player data for $name [$uniqueId]. Fetching from MongoDb or Hypixel.")
-            val playerData = loadPlayerDataFromMongoDb(uniqueId) ?: createPlayerDataFromHypixel(uniqueId, name)
-            playerData.also {
-                loadedPlayerMap[uniqueId] = it
+            getPlayerDataMutexForUUID(uniqueId).withLock {
+                logger.info("Unable to find cached player data for $name [$uniqueId]. Fetching from MongoDb or Hypixel.")
+                val playerData = loadPlayerDataFromMongoDb(uniqueId) ?: createPlayerDataFromHypixel(uniqueId, name)
+                playerData.also {
+                    loadedPlayerMap[uniqueId] = it
+                }
             }
         }
     }
