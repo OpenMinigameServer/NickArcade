@@ -53,7 +53,7 @@ class ArcadePlayer(val data: ArcadePlayerData) : ArcadeSender(data.uuid) {
     }
 
 
-    operator fun <T> set(dataTag: RuntimeExtraDataTag<T>, value: T) {
+    operator fun <T> set(dataTag: RuntimeExtraDataTag<T>, value: T?) {
         if (value == null) {
             runtimeExtraData.remove(dataTag.tagName)
             return
@@ -70,7 +70,7 @@ class ArcadePlayer(val data: ArcadePlayerData) : ArcadeSender(data.uuid) {
     val effectivePrefix: String
         get() = computeEffectivePrefix() ?: ""
 
-    private fun computeEffectivePrefix(actualData: Boolean = false): String? = with(data) {
+    fun computeEffectivePrefix(actualData: Boolean = false): String? = with(data) {
         val playerOverrides = if (actualData) overrides else effectivePlayerOverrides()
         return playerOverrides.prefixOverride?.let { if (!it.endsWith(' ')) "$it " else it }
             ?: if (hypixelData != null)
@@ -116,12 +116,12 @@ class ArcadePlayer(val data: ArcadePlayerData) : ArcadeSender(data.uuid) {
     val networkLevel: Long
         get() = effectivePlayerOverrides().networkLevel ?: data.hypixelData?.networkLevel ?: 1
 
+    val actualNetworkLevel: Long
+        get() = data.overrides.networkLevel ?: data.hypixelData?.networkLevel ?: 1
 
     fun getChatName(): String = getChatName(false)
 
-
     fun getChatName(actualData: Boolean): String = getChatName(actualData, false)
-
 
     override fun getChatName(actualData: Boolean, colourPrefixOnly: Boolean): String {
         var name = displayName
