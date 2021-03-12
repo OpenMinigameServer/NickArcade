@@ -70,7 +70,7 @@ object PlayerDataManager {
         }
     }
 
-    private val refreshTime = 24.hours
+    private val refreshTime = 30.minutes
     private suspend fun loadPlayerDataFromMongoDb(uniqueId: UUID) = playerDataCollection.findOneById(uniqueId)?.also {
         if ((Clock.System.now() - it.lastProfileUpdate) >= refreshTime) {
             val user = "${it.hypixelData?.displayName ?: "Unknown name"} [${it.uuid}]"
