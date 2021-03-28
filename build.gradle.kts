@@ -6,7 +6,6 @@ plugins {
 
 nickarcade {
     isCoreProject = true
-    arcadiumVersion = "1.16.5-R0.1-SNAPSHOT"
 }
 
 val cloudVersion = "1.4.0"

@@ -78,26 +78,6 @@ object PlayerEvents {
 
     private fun registerPreLoginEvent() {
         event<AsyncPlayerPreLoginEvent>(forceBlocking = true) {
-    /* TODO: Invite
-                if (!InviteManager.hasPlayerReceivedInvite(playerUuid)) {
-                    player.kick(MinestomComponentSerializer.get().serialize(Component.text {
-                        it.append(
-                            Component.text("You are not allowed to join this server!", NamedTextColor.RED)
-                                .append(Component.newline())
-                        )
-                        it.append(Component.newline())
-                        it.append(
-                            Component.text("Reason: ", NamedTextColor.GRAY).append(
-                                Component.text(
-                                    "You have not received an invite to play on this server.",
-                                    NamedTextColor.WHITE
-                                )
-                            ).append(Component.newline())
-                        )
-                    }))
-                    return@event
-                }
-    */
 
             val isValidName = validNamePattern.matchEntire(name) != null
 

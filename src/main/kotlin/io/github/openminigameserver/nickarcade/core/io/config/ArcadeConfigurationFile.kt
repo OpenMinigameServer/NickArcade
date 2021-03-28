@@ -1,6 +1,7 @@
 package io.github.openminigameserver.nickarcade.core.io.config
 
 import io.github.openminigameserver.nickarcade.plugin.extensions.pluginInstance
+import org.bukkit.plugin.java.JavaPlugin
 import org.spongepowered.configurate.CommentedConfigurationNode
 import org.spongepowered.configurate.ConfigurationOptions
 import org.spongepowered.configurate.kotlin.objectMapper
@@ -10,8 +11,11 @@ import java.io.File
 
 const val CURRENT_CONFIG_VERSION = 2
 
-inline class ArcadeConfigurationFile(private val fileName: String) {
-    val file get() = File(pluginInstance.dataFolder, fileName)
+class ArcadeConfigurationFile(
+    private val fileName: String,
+    val plugin: JavaPlugin = pluginInstance
+) {
+    val file get() = File(plugin.dataFolder, fileName)
     val loader: YamlConfigurationLoader
         get() = YamlConfigurationLoader.builder()
             .defaultOptions { opts: ConfigurationOptions ->
