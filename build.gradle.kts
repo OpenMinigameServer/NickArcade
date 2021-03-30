@@ -8,7 +8,7 @@ nickarcade {
     isCoreProject = true
 }
 
-val cloudVersion = "1.4.0"
+val cloudVersion = "1.5.0-SNAPSHOT"
 val configurateVersion = "4.0.0"
 val kMongoVersion = "4.2.3"
 val coroutinesVersion = "1.4.2"

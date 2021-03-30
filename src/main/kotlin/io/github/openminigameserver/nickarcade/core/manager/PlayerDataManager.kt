@@ -57,10 +57,10 @@ object PlayerDataManager {
     private fun getPlayerDataMutexForUUID(uniqueId: UUID) = userMutexMap.getOrPut(uniqueId) { Mutex(false) }
 
     suspend fun getPlayerData(uniqueId: UUID, name: String): ArcadePlayer {
-        return if (loadedPlayerMap[uniqueId] != null) {
+        return getPlayerDataMutexForUUID(uniqueId).withLock {
+        if (loadedPlayerMap[uniqueId] != null) {
             loadedPlayerMap[uniqueId]!!
         } else {
-            getPlayerDataMutexForUUID(uniqueId).withLock {
                 logger.info("Unable to find cached player data for $name [$uniqueId]. Fetching from MongoDb or Hypixel.")
                 val playerData = loadPlayerDataFromMongoDb(uniqueId) ?: createPlayerDataFromHypixel(uniqueId, name)
                 playerData.also {

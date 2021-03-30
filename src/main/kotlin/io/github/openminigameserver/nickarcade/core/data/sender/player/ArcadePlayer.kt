@@ -5,7 +5,6 @@ import io.github.openminigameserver.hypixelapi.models.HypixelPlayer
 import io.github.openminigameserver.hypixelapi.utis.MinecraftChatColor
 import io.github.openminigameserver.nickarcade.core.data.sender.ArcadeSender
 import io.github.openminigameserver.nickarcade.core.data.sender.player.extra.ExtraDataValue
-import io.github.openminigameserver.nickarcade.core.data.sender.player.extra.RuntimeExtraDataTag
 import io.github.openminigameserver.nickarcade.core.manager.PlayerDataProviderManager
 import net.kyori.adventure.audience.Audience
 import net.kyori.adventure.text.Component.newline
@@ -18,7 +17,7 @@ import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import kotlin.time.Duration
 
-class ArcadePlayer(val data: ArcadePlayerData) : ArcadeSender(data.uuid) {
+open class ArcadePlayer(val data: ArcadePlayerData) : ArcadeSender(data.uuid) {
 
     suspend fun coolDown(name: String, cooldownDuration: Duration, code: (suspend () -> Unit)? = null): Boolean {
         val lastUse = data.cooldowns[name]
@@ -30,38 +29,15 @@ class ArcadePlayer(val data: ArcadePlayerData) : ArcadeSender(data.uuid) {
         } else false
     }
 
-    override val audience: Audience
+    open override val audience: Audience
         get() = commandSender
-
-
-    val player: Player?
-        get() = Bukkit.getPlayer(uuid)
-
-    //region Extra data
 
     override val extraData: MutableMap<String, ExtraDataValue>
         get() = data.extraData
 
-    private val runtimeExtraData = mutableMapOf<String, Any?>()
-    operator fun <T> contains(dataTag: RuntimeExtraDataTag<T>): Boolean {
-        return get(dataTag) != null
-    }
 
-    @Suppress("UNCHECKED_CAST")
-    operator fun <T> get(dataTag: RuntimeExtraDataTag<T>): T? {
-        return runtimeExtraData[dataTag.tagName] as? T?
-    }
-
-
-    operator fun <T> set(dataTag: RuntimeExtraDataTag<T>, value: T?) {
-        if (value == null) {
-            runtimeExtraData.remove(dataTag.tagName)
-            return
-        }
-        runtimeExtraData[dataTag.tagName] = value
-    }
-    //endregion
-
+    val player: Player?
+        get() = Bukkit.getPlayer(uuid)
 
     val isOnline: Boolean
         get() = player != null

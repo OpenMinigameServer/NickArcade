@@ -19,6 +19,8 @@ import org.litote.kmongo.or
 import java.util.*
 
 class PlayerDataParser<C> : ArgumentParser<C, ArcadePlayer> {
+    var isCachedWhenLoaded = true
+
     override fun parse(commandContext: CommandContext<C>, queue: Queue<String>): ArgumentParseResult<ArcadePlayer> {
         return runBlocking {
             val argument: String? = queue.peek()
@@ -59,7 +61,7 @@ class PlayerDataParser<C> : ArgumentParser<C, ArcadePlayer> {
                     if (PlayerDataManager.isPlayerDataLoaded(data.uuid)) {
                         //Use the player data we already have loaded
                         data = PlayerDataManager.getPlayerData(data.uuid, data.actualDisplayName)
-                    } else {
+                    } else if (isCachedWhenLoaded) {
                         //Store in memory first, then return.
                         PlayerDataManager.storeInMemory(data)
                     }
