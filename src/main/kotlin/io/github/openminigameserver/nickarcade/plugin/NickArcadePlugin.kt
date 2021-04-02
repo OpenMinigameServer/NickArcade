@@ -7,7 +7,6 @@ import io.github.openminigameserver.nickarcade.core.commandAnnotationParser
 import io.github.openminigameserver.nickarcade.core.io.config.ArcadeConfigurationFile
 import io.github.openminigameserver.nickarcade.core.io.config.impl.MainConfigurationFile
 import io.github.openminigameserver.nickarcade.core.io.database.DatabaseService
-import io.github.openminigameserver.nickarcade.plugin.events.PlayerDataEvents
 import io.github.openminigameserver.nickarcade.plugin.events.PlayerEvents
 import io.github.openminigameserver.nickarcade.plugin.extensions.ComponentExtensions
 import io.github.openminigameserver.nickarcade.plugin.helper.commands.NickArcadeCommandHelper
@@ -31,7 +30,6 @@ class NickArcadePlugin : JavaPlugin() {
         initHypixelServices()
 
         PlayerEvents.registerHandlers()
-        PlayerDataEvents.registerHandlers()
 
         IoC += NickArcadeCommandHelper().apply { init() }
 

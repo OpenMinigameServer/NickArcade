@@ -7,10 +7,9 @@ import io.github.openminigameserver.nickarcade.plugin.helper.coroutines.Coroutin
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
-import org.bukkit.event.Event
-import org.bukkit.event.EventException
-import org.bukkit.event.EventPriority
-import org.bukkit.event.Listener
+import org.bukkit.World
+import org.bukkit.event.*
+import org.bukkit.plugin.EventExecutor
 import java.lang.reflect.InvocationTargetException
 
 val pluginInstance: NickArcadePlugin
@@ -38,28 +37,51 @@ inline fun <reified T : Event> event(
 ) {
     pluginInstance.server.pluginManager.registerEvent(
         T::class.java as Class<out Event>, object : Listener {}, eventPriority,
-        { _, event ->
-            if (!T::class.java.isInstance(event)) return@registerEvent
-            try {
-                val isAsync = forceAsync || event.isAsynchronous
-                when {
-                    forceBlocking -> {
-                        runBlocking { code(event as T, this) }
-                    }
-                    isAsync -> {
-                        launchAsync { code(event as T, this) }
-                    }
-                    else -> {
-                        launch { code(event as T, this) }
-                    }
-                }
-            } catch (var4: InvocationTargetException) {
-                throw EventException(var4.cause)
-            } catch (var5: Throwable) {
-                throw EventException(var5)
-            }
-        },
+        computeEventExecutor(forceAsync, forceBlocking, code),
         pluginInstance, ignoreCancelled
     )
+}
+
+@Suppress("UNCHECKED_CAST")
+inline fun <reified T> worldBoundEvent(
+    world: World,
+    eventPriority: EventPriority = EventPriority.NORMAL,
+    ignoreCancelled: Boolean = false, forceAsync: Boolean = false, forceBlocking: Boolean = false,
+    noinline code: suspend T.(CoroutineScope) -> Unit
+)
+        where T : Event,
+              T : WorldProvider {
+    pluginInstance.server.pluginManager.registerEvent(
+        T::class.java as Class<out Event>, object : Listener {}, eventPriority,
+        computeEventExecutor(forceAsync, forceBlocking, code),
+        pluginInstance, ignoreCancelled,
+        world
+    )
+}
+
+inline fun <reified T> computeEventExecutor(
+    forceAsync: Boolean,
+    forceBlocking: Boolean,
+    crossinline code: suspend T.(CoroutineScope) -> Unit
+) where T : Event, T : WorldProvider = EventExecutor { _, event: Event ->
+    if (!T::class.java.isInstance(event)) return@EventExecutor
+    try {
+        val isAsync = forceAsync || event.isAsynchronous
+        when {
+            forceBlocking -> {
+                runBlocking { code(event as T, this) }
+            }
+            isAsync -> {
+                launchAsync { code(event as T, this) }
+            }
+            else -> {
+                launch { code(event as T, this) }
+            }
+        }
+    } catch (var4: InvocationTargetException) {
+        throw EventException(var4.cause)
+    } catch (var5: Throwable) {
+        throw EventException(var5)
+    }
 }
 
