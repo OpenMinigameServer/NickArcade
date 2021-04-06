@@ -63,19 +63,20 @@ inline fun <reified T> computeEventExecutor(
     forceAsync: Boolean,
     forceBlocking: Boolean,
     crossinline code: suspend T.(CoroutineScope) -> Unit
-) where T : Event, T : WorldProvider = EventExecutor { _, event: Event ->
+) where T : Event = EventExecutor { _, event: Event ->
     if (!T::class.java.isInstance(event)) return@EventExecutor
+    if (event !is T) return@EventExecutor
     try {
         val isAsync = forceAsync || event.isAsynchronous
         when {
             forceBlocking -> {
-                runBlocking { code(event as T, this) }
+                runBlocking { code(event, this) }
             }
             isAsync -> {
-                launchAsync { code(event as T, this) }
+                launchAsync { code(event, this) }
             }
             else -> {
-                launch { code(event as T, this) }
+                launch { code(event, this) }
             }
         }
     } catch (var4: InvocationTargetException) {

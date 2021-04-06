@@ -71,7 +71,6 @@ class PlayerDataParser<C> : ArgumentParser<C, ArcadePlayer> {
                 return@runBlocking ArgumentParseResult.failure(
                     Exception(
                         argument,
-
                         )
                 )
             }

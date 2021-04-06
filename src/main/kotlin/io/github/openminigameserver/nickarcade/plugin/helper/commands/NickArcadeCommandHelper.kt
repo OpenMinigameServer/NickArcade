@@ -3,14 +3,10 @@ package io.github.openminigameserver.nickarcade.plugin.helper.commands
 import cloud.commandframework.annotations.AnnotationParser
 import cloud.commandframework.arguments.parser.ParserParameters
 import cloud.commandframework.arguments.parser.StandardParameters
-import cloud.commandframework.execution.AsynchronousCommandExecutionCoordinator
 import cloud.commandframework.meta.SimpleCommandMeta
 import io.github.openminigameserver.nickarcade.core.IoC
 import io.github.openminigameserver.nickarcade.core.data.sender.ArcadeSender
-import io.github.openminigameserver.nickarcade.core.manager.getArcadeSender
-import io.github.openminigameserver.nickarcade.plugin.extensions.launch
 import io.github.openminigameserver.nickarcade.plugin.extensions.permission
-import kotlinx.coroutines.runBlocking
 import java.util.function.BiFunction
 
 
@@ -22,12 +18,7 @@ class NickArcadeCommandHelper {
 
     fun init(): NickArcadeCommandHelper {
         try {
-            manager = NickArcadeCommandManager(
-                AsynchronousCommandExecutionCoordinator.newBuilder<ArcadeSender>()
-                    .withAsynchronousParsing().withExecutor { launch { it.run() } }.build(),
-                { runBlocking { it.getArcadeSender() } },
-                { it.commandSender }
-            )
+            manager = NickArcadeCommandManager()
             IoC += manager
 
             val commandMetaFunction =
