@@ -13,7 +13,7 @@ import org.litote.kmongo.util.KMongoConfiguration
 import org.litote.kmongo.util.KMongoJacksonFeature
 
 object MongoDbConnectionHelper {
-    private fun registerModule(module: Module) {
+    fun registerModule(module: Module) {
         KMongoConfiguration.extendedJsonMapper.registerModule(module)
         KMongoConfiguration.registerBsonModule(module)
     }
