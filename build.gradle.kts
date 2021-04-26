@@ -13,6 +13,7 @@ val configurateVersion = "4.0.0"
 val kMongoVersion = "4.2.3"
 val coroutinesVersion = "1.4.2"
 val adventureVersion = "4.0.0-SNAPSHOT"
+val ifVersion = "0.9.5"
 
 dependencies {
     //Hypixel API Client
@@ -32,4 +33,7 @@ dependencies {
 
     //Database I/O
     api("org.litote.kmongo:kmongo-coroutine:$kMongoVersion")
+
+    //Inventory UIs
+    api("com.github.stefvanschie.inventoryframework:IF:$ifVersion")
 }
