@@ -6,17 +6,16 @@ import io.github.openminigameserver.nickarcade.core.events.data.PlayerDataReload
 import io.github.openminigameserver.nickarcade.core.manager.PlayerDataManager
 import io.github.openminigameserver.nickarcade.core.manager.getArcadeSender
 import io.github.openminigameserver.nickarcade.core.ticks
+import io.github.openminigameserver.nickarcade.core.ui.ItemActionHelper
 import io.github.openminigameserver.nickarcade.plugin.extensions.async
 import io.github.openminigameserver.nickarcade.plugin.extensions.event
 import io.github.openminigameserver.nickarcade.plugin.extensions.launch
+import io.github.openminigameserver.nickarcade.plugin.extensions.launchAsync
 import kotlinx.coroutines.delay
 import net.kyori.adventure.text.Component.text
 import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.TextDecoration
-import org.bukkit.event.player.AsyncPlayerPreLoginEvent
-import org.bukkit.event.player.PlayerJoinEvent
-import org.bukkit.event.player.PlayerLoginEvent
-import org.bukkit.event.player.PlayerQuitEvent
+import org.bukkit.event.player.*
 
 object PlayerEvents {
 
@@ -48,6 +47,23 @@ object PlayerEvents {
         registerPreLoginEvent()
         registerLoginEvent()
         registerQuitEvent()
+        registerItemActionEvent()
+    }
+
+    private fun registerItemActionEvent() {
+        event<PlayerDropItemEvent>(forceBlocking = true) {
+            if (ItemActionHelper.getItemAction(itemDrop.itemStack) != null) {
+                isCancelled = true
+            }
+        }
+        event<PlayerInteractEvent>(forceBlocking = true) {
+            if (this.hasItem() && this.item != null && this.item?.hasItemMeta() == true) {
+                isCancelled = true
+                launchAsync {
+                    ItemActionHelper.executeAction(this@event.item!!.itemMeta, player.getArcadeSender())
+                }
+            }
+        }
     }
 
     private fun registerJoinEvent() {
