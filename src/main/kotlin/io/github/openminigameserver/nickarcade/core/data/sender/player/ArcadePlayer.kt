@@ -15,6 +15,7 @@ import org.bukkit.Bukkit
 import org.bukkit.ChatColor.getLastColors
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
+import org.geysermc.floodgate.api.FloodgateApi
 import kotlin.time.Duration
 
 open class ArcadePlayer(val data: ArcadePlayerData) : ArcadeSender(data.uuid) {
@@ -29,8 +30,10 @@ open class ArcadePlayer(val data: ArcadePlayerData) : ArcadeSender(data.uuid) {
         } else false
     }
 
+    private val floodgateAudience: FloodgateAudience by lazy { FloodgateAudience(this) }
+
     open override val audience: Audience
-        get() = commandSender
+        get() = (if (isFloodgatePlayer) floodgateAudience else player)  ?: Audience.empty()
 
     override val extraData: MutableMap<String, ExtraDataValue>
         get() = data.extraData
@@ -159,36 +162,7 @@ open class ArcadePlayer(val data: ArcadePlayerData) : ArcadeSender(data.uuid) {
     override fun hashCode(): Int {
         return uuid.hashCode()
     }
+
+    val isFloodgatePlayer: Boolean
+        get() = player?.uniqueId?.let { FloodgateApi.getInstance().isFloodgatePlayer(it) } ?: false
 }
-/*
-    TODO: Player games / party data
-
-    fun getOrCreateParty(): Party {
-        if (getCurrentParty() == null) {
-            return PartyManager.createParty(this)
-        }
-        return getCurrentParty() as Party
-    }
-
-
-    fun getCurrentGame(): Game? {
-        return MiniGameManager.getCurrentGame(this)
-    }
-
-
-    fun getCurrentParty(showPrompt: Boolean = false): Party? {
-        return PartyManager.getParty(this).also {
-            if (it == null && showPrompt) {
-                audience.sendMessage(separator {
-                    append(text("You are not currently in a party.", NamedTextColor.RED))
-                })
-            }
-        }
-    }
-
-
-    fun setCurrentParty(party: Party?) {
-        return PartyManager.setPlayerParty(this, party)
-    }
-
-*/

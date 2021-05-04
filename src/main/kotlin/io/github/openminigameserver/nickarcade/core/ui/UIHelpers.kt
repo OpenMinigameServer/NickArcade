@@ -1,10 +1,12 @@
 package io.github.openminigameserver.nickarcade.core.ui
 
+import com.github.stefvanschie.inventoryframework.gui.GuiItem
 import com.github.stefvanschie.inventoryframework.gui.type.ChestGui
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.ComponentLike
 import net.kyori.adventure.text.format.TextDecoration
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer
+import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.ItemMeta
 import org.checkerframework.checker.nullness.qual.NonNull
@@ -15,6 +17,10 @@ fun chestGui(rows: Int, title: ComponentLike, code: ChestGui.() -> Unit): ChestG
 
 fun ItemStack.itemMeta(code: ItemMeta.() -> Unit): ItemStack {
     return itemMeta<ItemMeta>(code)
+}
+
+fun guiItem(item: ItemStack, handler: InventoryClickEvent.() -> Unit = {isCancelled = true}): GuiItem {
+    return GuiItem(item, handler)
 }
 
 @JvmName("itemMetaGeneric")

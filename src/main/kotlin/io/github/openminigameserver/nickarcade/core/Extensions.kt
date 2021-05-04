@@ -55,11 +55,8 @@ operator fun <T0, T1, T2, T3> KProperty1<T0, T1?>.div(p2: KProperty1<T2, T3?>): 
     @Suppress("INVISIBLE_MEMBER")
     (KPropertyPath(this, p2))
 
-
-val separator = text(" ".repeat(64), Style.style(TextDecoration.STRIKETHROUGH))
-
 fun separator(color: TextColor = NamedTextColor.BLUE): Component {
-    return separator.style {
+    return text("  ".repeat(32), Style.style(TextDecoration.STRIKETHROUGH)).style {
         it.decorate(TextDecoration.STRIKETHROUGH)
         it.color(color)
     }
