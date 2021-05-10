@@ -7,9 +7,14 @@ import io.github.openminigameserver.nickarcade.core.commandAnnotationParser
 import io.github.openminigameserver.nickarcade.core.io.config.ArcadeConfigurationFile
 import io.github.openminigameserver.nickarcade.core.io.config.impl.MainConfigurationFile
 import io.github.openminigameserver.nickarcade.core.io.database.DatabaseService
+import io.github.openminigameserver.nickarcade.core.manager.PlayerDataManager
 import io.github.openminigameserver.nickarcade.plugin.events.PlayerEvents
 import io.github.openminigameserver.nickarcade.plugin.extensions.ComponentExtensions
+import io.github.openminigameserver.nickarcade.plugin.extensions.event
 import io.github.openminigameserver.nickarcade.plugin.helper.commands.NickArcadeCommandHelper
+import org.bukkit.Bukkit
+import org.bukkit.event.EventPriority
+import org.bukkit.event.player.AsyncPlayerPreLoginEvent
 import org.bukkit.plugin.java.JavaPlugin
 import java.util.*
 
@@ -34,6 +39,13 @@ class NickArcadePlugin : JavaPlugin() {
         IoC += NickArcadeCommandHelper().apply { init() }
 
         commandAnnotationParser.parse(ComponentExtensions)
+        if (!Bukkit.getOnlineMode()) {
+            event<AsyncPlayerPreLoginEvent>(forceBlocking = true, eventPriority = EventPriority.LOWEST) {
+                PlayerDataManager.getPlayerData(uniqueId, name).also {
+                    this.playerProfile.id = it.uuid
+                }
+            }
+        }
     }
 
     private fun prepareIoCValues() {

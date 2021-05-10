@@ -8,14 +8,17 @@ import io.github.openminigameserver.nickarcade.core.data.sender.misc.ArcadeConso
 import io.github.openminigameserver.nickarcade.core.data.sender.player.ArcadePlayer
 import io.github.openminigameserver.nickarcade.core.data.sender.player.ArcadePlayerData
 import io.github.openminigameserver.nickarcade.core.database
+import io.github.openminigameserver.nickarcade.core.div
 import io.github.openminigameserver.nickarcade.core.events.data.PlayerDataReloadEvent
 import io.github.openminigameserver.nickarcade.core.hypixelPlayerInfoHelper
 import io.github.openminigameserver.nickarcade.core.logger
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.datetime.Clock
+import org.bukkit.Bukkit
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
+import org.litote.kmongo.eq
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.time.measureTimedValue
@@ -58,11 +61,12 @@ object PlayerDataManager {
 
     suspend fun getPlayerData(uniqueId: UUID, name: String): ArcadePlayer {
         return getPlayerDataMutexForUUID(uniqueId).withLock {
-        if (loadedPlayerMap[uniqueId] != null) {
-            loadedPlayerMap[uniqueId]!!
-        } else {
+            if (loadedPlayerMap[uniqueId] != null) {
+                loadedPlayerMap[uniqueId]!!
+            } else {
                 logger.info("Unable to find cached player data for $name [$uniqueId]. Fetching from MongoDb or Hypixel.")
-                val playerData = loadPlayerDataFromMongoDb(uniqueId) ?: createPlayerDataFromHypixel(uniqueId, name)
+                val playerData =
+                    loadPlayerDataFromMongoDb(uniqueId, name) ?: createPlayerDataFromHypixel(uniqueId, name)
                 playerData.also {
                     loadedPlayerMap[uniqueId] = it
                 }
@@ -71,20 +75,27 @@ object PlayerDataManager {
     }
 
     private val refreshTime = 30.minutes
-    private suspend fun loadPlayerDataFromMongoDb(uniqueId: UUID) = playerDataCollection.findOneById(uniqueId)?.also {
-        if ((Clock.System.now() - it.lastProfileUpdate) >= refreshTime) {
-            val user = "${it.hypixelData?.displayName ?: "Unknown name"} [${it.uuid}]"
-            println("Updating user $user due to profile being too old.")
-            val (value, duration) = measureTimedValue {
-                fetchHypixelPlayerData(it.uuid, it.hypixelData?.displayName!!)
-            }
-            it.hypixelData = value
-            it.updateHypixelData(false)
-            it.lastProfileUpdate = Clock.System.now()
-            savePlayerData(it)
-            println("Updated user $user successfully (Took ${duration}).")
+    private suspend fun loadPlayerDataFromMongoDb(uniqueId: UUID, name: String): ArcadePlayer? {
+        if (!Bukkit.getOnlineMode()) {
+            return playerDataCollection.findOne(ArcadePlayerData::rawHypixelData / HypixelPlayer::displayName eq name)
+                ?.let { ArcadePlayer(it) }
         }
-    }?.let { ArcadePlayer(it) }
+
+        return playerDataCollection.findOneById(uniqueId)?.also {
+            if ((Clock.System.now() - it.lastProfileUpdate) >= refreshTime) {
+                val user = "${it.hypixelData?.displayName ?: "Unknown name"} [${it.uuid}]"
+                println("Updating user $user due to profile being too old.")
+                val (value, duration) = measureTimedValue {
+                    fetchHypixelPlayerData(it.uuid, it.hypixelData?.displayName!!)
+                }
+                it.hypixelData = value
+                it.updateHypixelData(false)
+                it.lastProfileUpdate = Clock.System.now()
+                savePlayerData(it)
+                println("Updated user $user successfully (Took ${duration}).")
+            }
+        }?.let { ArcadePlayer(it) }
+    }
 
     val playerDataCollection by lazy {
         database.getCollection<ArcadePlayerData>("players")
