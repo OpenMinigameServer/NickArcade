@@ -12,9 +12,8 @@ import net.kyori.adventure.text.serializer.plain.PlainComponentSerializer
 import org.geysermc.cumulus.SimpleForm
 import org.geysermc.floodgate.api.FloodgateApi
 
-class FloodgateAudience(val player: ArcadePlayer) : Audience by player.audience {
+class FloodgateAudience(val player: ArcadePlayer) : Audience by player.player!! {
     override fun openBook(book: Book) {
-
         val builder = SimpleForm.builder().apply {
             title(PlainComponentSerializer.plain().serialize(book.title()))
             val page = book.pages().first()
@@ -53,7 +52,7 @@ class FloodgateAudience(val player: ArcadePlayer) : Audience by player.audience 
     }
 
     override fun sendMessage(source: Identity, message: Component, type: MessageType) {
-        player.audience.sendMessage(source, message.replaceText {
+        player.player?.sendMessage(source, message.replaceText {
             it.matchLiteral("  ")
             it.replacement { c ->
                 val build = c.build()
